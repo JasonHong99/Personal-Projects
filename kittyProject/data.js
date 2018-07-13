@@ -11,19 +11,20 @@ var con = mysql.createConnection({
   table: 'kitties'
 });
 
+//connect to mysql databse
 con.connect(function (err) {
   if (err) throw err;
   console.log('Connected!');
 });
 
-
-
+//this function returns the total number of kitties
 async function getTotalCount () {
   const number = await myContract.methods.totalSupply().call();
   console.log(number);
   return number;
 }
 
+//this function gets information for 20 kitties each time being run
 async function getKitties (totalCount, kittyId) {
   var allKitties = [];
 
@@ -55,7 +56,7 @@ return allKitties;
 }
 
 
-
+//this function produces a long string for 20 kitties following mysql statement syntax
 async function buildKittySQLStr (allKitties, kittyId) {
   var currentKitty;
   var kittyStrPiece = '';
@@ -86,7 +87,7 @@ async function buildKittySQLStr (allKitties, kittyId) {
 }
 
 
-
+//this function pushes information of 20 kitties into database
 async function saveKittyToDB(kittyStr) {
   var sql = 'INSERT INTO kitties VALUES' + ' ' + kittyStr;
   return new Promise((resolve, reject) => {
@@ -97,25 +98,15 @@ async function saveKittyToDB(kittyStr) {
   });
 }
 
-/* var obj = {
-then: function() {},
-catch: function(){},
-done: function(){}
-}; */
-
+//main function
 async function task() {
   var kittyId = 1;
-  //var kittiesGroup = 1;
   const totalCount = await getTotalCount();
   while(kittyId <= totalCount){
-    //while(kittiesGroup < 20){
       const allKitties = await getKitties(totalCount, kittyId);
       const kittyStr = await buildKittySQLStr(allKitties, kittyId);
       const sqlResult = await saveKittyToDB(kittyStr);
       kittyId = kittyId + 20;
-      //kittiesGroup = kittiesGroup + 5;
-    //}
-    //kittiesGroup = 1;
     console.log('20 kitties have been added');
   }
 }
@@ -123,23 +114,3 @@ task().then(() => {
   con.end();
   console.log('done!');
 });
-
-
-/*
-async function task() {
-  var kittyId = 1;
-  var kittiesGroup = 1;
-  const totalCount = await getTotalCount();
-  while(kittyId <= 40){
-    while(kittiesGroup < 20){
-      const allKitties = await getKitties(totalCount, kittyId);
-      const kittyStr = await buildKittySQLStr(allKitties, kittyId);
-      const sqlResult = await saveKittyToDB(kittyStr);
-      kittyId = kittyId + 5;
-      kittiesGroup = kittiesGroup + 5;
-    }
-    kittiesGroup = 1;
-    console.log('20 kitties have been added');
-  }
-}
-*/
